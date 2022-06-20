@@ -1,0 +1,243 @@
+---
+title: "Cost effectiveness-informed cutpoints for clinical prediction models"
+author: "Rex Parsons"
+date: "2022-07-15"
+output:
+  ioslides_presentation:
+    widescreen: true
+    logo: 'www/aushsi-logo.png'
+    css: www/styles.css
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+  $('slide:not(.backdrop):not(.title-slide)').append('<div class=\"footnotes\">');
+
+  $('footnote').each(function(index) {
+    var text  = $(this).html();
+    var fnNum = (index+1).toString();
+    $(this).html(fnNum.sup());
+
+    var footnote   = fnNum + '. ' + text + '<br/>';
+    var oldContent = $(this).parents('slide').children('div.footnotes').html();
+    var newContent = oldContent + footnote;
+    $(this).parents('slide').children('div.footnotes').html(newContent);
+  });
+});
+</script>
+
+## Outline
+
+- Background to prediction models and cutpoints
+- Integrating economic considerations into cutpoint selection
+- Simulation study results
+
+## {.fullside}
+
+![](www/intro-boring.png){.center height=600px}
+
+
+## Computerised decision support systems {.fullside}
+
+![](www/cdss.jpg){.center height=450px}
+
+## Prediction models
+
+>- Do they have it? (diagnostic)
+>- Will they get it? (prognostic)
+
+
+>- Estimates patient risk given some data
+
+## Prediction models
+
+![](www/p-given-data.png){.center height=400px}
+
+## Prediction models
+
+
+But how do they inform the user?
+
+>- Probability of fall
+>- Odds of fall
+>- High/medium/low risk categories 🚦
+>- Binary categories (intervention vs none)
+
+
+## Prediction models
+
+
+But how do they inform the user?
+
+
+- **Probability of fall**
+- **Odds of fall**
+- **High/medium/low risk categories**🚦
+- Binary categories (intervention vs none)
+
+
+## Prediction models
+
+
+But how do they inform the user?
+
+- Probability of fall
+- Odds of fall
+- High/medium/low risk categories 🚦
+- **Binary categories (intervention vs none)**
+
+
+## Cutpoints
+
+
+![](www/sand-1.jpg){.center height=323px}
+
+
+## Cutpoints
+
+![](www/sand-2.png){.center height=400px}
+
+
+## Cutpoints
+
+
+![](www/sand-3.png){.center height=400px}
+
+
+## {.fullscreen}
+
+```{r, echo=F, message=F, warning=F}
+shinyAppDir("apps/prediction-threshold-slider/")
+```
+
+## Cutpoint selection methods
+
+All maximise a performance based metric (not outcome) <footnote>Ilker Unal. "Defining an Optimal Cut-Point Value in ROC Analysis: An Alternative Approach." *Computational and Mathematical Methods in Medicine* (2017).</footnote>
+
+- Youden index: $J(c) = Se(c) + Sp(c) - 1$
+
+- Sens-Spec product: $CZ(c) = Se(c) \times Sp(c)$
+
+- Index of Union: $IU(c) = |Se(c) − AUC| + |Sp(c) − AUC|$
+
+- The Closest to (0, 1) Criteria: $ER(c) = \sqrt{(1 − Se(c)^2) + (1 − Sp(c)^2)}$
+
+<br>
+
+>- None of these consider anything beyond the model itself (costs, patietn outcomes, interventions)
+
+
+## Objectives
+
+
+- Integrate information of patient outcomes and treatment costs into cutpoint selection
+
+>- Evaluate how it compares to other cutpoint selection methods using a simulation study
+
+
+## Evaluation {.build}
+
+Net Monetary Benefit (NMB) is calculated separately for each possible classification.
+
+$$
+NMB = COST_{outcome}\times(1-EFFECT_{treatment}) + COST_{treatment}
+\\
+COST_{outcome} = QALY\times WTP
+$$
+
+```{r, echo=F}
+data.frame(
+  row.names = c("Actually Positive", "Actually Negative"),
+  P_Positive = c("TRUE POSITIVE (TP)", "FALSE POSITIVE (FP)"), 
+  P_Negative = c("FALSE NEGATIVE (FN)", "TRUE NEGATIVE (TN)")
+) %>%
+  rename("Predicted Positive" = P_Positive,
+         "Predicted Negative" = P_Negative) %>%
+  kable() %>%
+  kable_styling(font_size=15, full_width=FALSE) %>%
+  column_spec(1, bold=T)
+```
+
+```{r, echo=F}
+data.frame(
+  row.names = c("Actually Positive", "Actually Negative"),
+  P_Positive = c(
+    "$NMB = COST_{outcome}\\times(1-EFFECT_{treatment}) + COST_{treatment}$", 
+    "$NMB = COST_{treatment}$"
+  ), 
+  P_Negative = c(
+    "$NMB = COST_{outcome}$",
+    "$NMB = 0$"
+  )
+) %>%
+  rename("Predicted Positive" = P_Positive,
+         "Predicted Negative" = P_Negative) %>%
+  kable() %>%
+  kable_styling(font_size=15, full_width=FALSE) %>%
+  column_spec(1, bold=T)
+```
+
+## Cost-effective cutpoint
+
+Modified the `total_utility()` from `{cutpointr}` package by Christian Thiele
+
+
+## Simulation study
+
+- Values for intervention effectiveness, healthcare costs, and patient outcomes from inpatient falls literature
+
+- Used point estimates of these for obtaining the cost-effective-threshold but with uncertainty for evaluation
+
+
+## Simulation loop
+
+
+>- Sample training data
+>- Fit prediction model
+>- Obtain cutpoints using each method
+>- Sample validation data
+>- Get predicted probabilities for validation data
+>- Apply cutpoints to validation data predictions
+>- Get NMB values for each class by sampling costs/effectiveness values from their distributions
+>- Calculate NMB for validation set and store results
+
+## Results
+
+- New method good
+- Even gooder when AUC low
+- Even gooder when event is rarer
+- Fun finding: treating none is pretty appealing
+
+
+## Conclusions
+
+- Considering costs when selecting a model cutpoint may facilitate value-based care
+
+- The best approach may be to treat-all or treat-none and this should be assessed under hypothetical model performance and simulated patient populations before wasting research efforts in seeking out CDSS
+
+
+
+## Thank you
+
+Team
+
+  - Robin Blythe
+  - Susanna Cramb
+  - Steven McPhail
+
+<br>
+
+![](www/twitter-logo.png){width=30 align="left"} @Rex_Parsons8
+
+![](www/github-logo.png){width=30px align="left"} @RWParsons
+
+![](www/website-icon.png){width=30px align="left"} http://rwparsons.github.io/
+
+slides: [github.com/RWParsons/im-22-presentation](https://github.com/RWParsons/im-22-presentation)
