@@ -131,7 +131,7 @@ All maximise a performance based metric (not outcome) <footnote>Ilker Unal. "Def
 
 <br>
 
->- None of these consider anything beyond the model itself (costs, patietn outcomes, interventions)
+>- None of these consider anything beyond the model itself (costs, patient outcomes, interventions)
 
 
 ## Objectives
@@ -184,36 +184,82 @@ data.frame(
   column_spec(1, bold=T)
 ```
 
-## Cost-effective cutpoint
+## Cost-effective cutpoint {.build}
 
-Modified the `total_utility()` from `{cutpointr}` package by Christian Thiele
+The `{cutpointr}` R package by Christian Thiele includes almost all the cutpoint selection methods methods but also allows you to pass custom metrics that aren't already built in
+
+Applied a custom metric and `{cutpointr}` to maximise NMB: 
+
+- Requires predictions, outcomes, and NMB values assigned to each class (TP, TN, FP, FN)
+
+$n_{TP} \times NMB_{TP} + n_{FP} \times NMB_{FP} + n_{TN} \times NMB_{TN} + n_{FN} \times NMB_{FN}$
+
+<br>
+
+Special thank you to Christian for responding to my twitter DMs and making an update to `{cutpointr}` that made this study easier!
+
+## Simulation study - inpatient falls
+
+- Values for intervention effectiveness, healthcare costs, and patient outcomes literature
+  - Patient education intervention
+  - Healthcare costs
+  - QALYs lost from falls
+  - WTP of 28k
+
+>- Used point estimates of these for obtaining the cost-effective-threshold but incorporated uncertainty for evaluation
 
 
-## Simulation study
-
-- Values for intervention effectiveness, healthcare costs, and patient outcomes from inpatient falls literature
-
-- Used point estimates of these for obtaining the cost-effective-threshold but with uncertainty for evaluation
-
-
-## Simulation loop
-
+## Simulation loop{.build}
 
 >- Sample training data
 >- Fit prediction model
->- Obtain cutpoints using each method
->- Sample validation data
+>- Obtain cutpoints using each method (cost-effective method uses point estimates)
+>- Sample validation data (n=10,000)
 >- Get predicted probabilities for validation data
->- Apply cutpoints to validation data predictions
+>- Apply all cutpoints to validation data predictions
 >- Get NMB values for each class by sampling costs/effectiveness values from their distributions
->- Calculate NMB for validation set and store results
+>- Calculate NMB for validation set under each cutpoint method and store results
 
-## Results
+<div style="text-align: right">**Repeat 5,000 times**</div>
 
-- New method good
-- Even gooder when AUC low
-- Even gooder when event is rarer
-- Fun finding: treating none is pretty appealing
+
+## Results - primary analysis
+
+```{r, echo=F, warning=F, message=F, fig.align="center", fig.height=5}
+df_result <- readRDS("input/falls_sim_data.rds")
+library(bayestestR)
+library(ggridges)
+
+names(df_result) <- c(
+  "n_sim", "Treat all", "Treat none", "Cost-effective", 
+  "The Closest to (0, 1) Criteria", "Youden", "Sens-Spec product", 
+  "Index of Union"
+)
+
+select(df_result, -c("Treat all", "Treat none")) %>%
+  plot_binned_ridges(., limit_y=F) +
+  labs(x="Net Monetary Benefit (NMB)\n")
+```
+
+## Results - primary analysis
+
+```{r, echo=F}
+df_result %>%
+  pivot_longer(!n_sim) %>%
+  group_by("Cutpoint method"=name) %>%
+  summarize(median_nmb = median(value)) %>%
+  arrange(desc(median_nmb)) %>%
+  mutate("Median NMB" = scales::dollar_format()(median_nmb)) %>%
+  select(-median_nmb) %>%
+  kable() %>%
+  kable_styling(font_size=15, full_width=FALSE) %>%
+  column_spec(1, bold=T)
+```
+
+
+## Results - sensitivity analyses
+
+TODO: changes with AUC and event_rate
 
 
 ## Conclusions

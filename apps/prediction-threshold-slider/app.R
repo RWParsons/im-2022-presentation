@@ -26,6 +26,7 @@ ui <- fluidPage(
 
         mainPanel(
            plotOutput("plot", height=320),
+           tags$br(),
            tableOutput("confusion_matrix") 
         )
     )
@@ -58,7 +59,7 @@ server <- function(input, output) {
         labs(
           x="Predicted probabilities",
           y="Number of observations",
-          fill=""
+          fill="Event"
         ) +
         scale_x_continuous(limits=c(0,1)) +
         theme(text = element_text(size = 13))
