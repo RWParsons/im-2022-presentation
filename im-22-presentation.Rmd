@@ -13,6 +13,8 @@ runtime: shiny
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(kableExtra)
+source("apps/src/utils.R")
 ```
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -211,14 +213,13 @@ Special thank you to Christian for responding to my twitter DMs and making an up
 
 ## Simulation loop{.build}
 
->- Sample training data
->- Fit prediction model
->- Obtain cutpoints using each method (cost-effective method uses point estimates)
->- Sample validation data (n=10,000)
->- Get predicted probabilities for validation data
->- Apply all cutpoints to validation data predictions
->- Get NMB values for each class by sampling costs/effectiveness values from their distributions
->- Calculate NMB for validation set under each cutpoint method and store results
+>1. Sample training data
+>2. Fit prediction model
+>3. Obtain cutpoints using each method (cost-effective method uses point estimates)
+>4. Sample validation data (n=10,000)
+>5. Get predicted probabilities for validation data using the fitted model
+>6. Get NMB values for each class by sampling costs/effectiveness values from their distributions
+>7. Calculate NMB for validation set under each cutpoint (obtained in step 3) and store results
 
 <div style="text-align: right">**Repeat 5,000 times**</div>
 
@@ -236,9 +237,42 @@ names(df_result) <- c(
   "Index of Union"
 )
 
-select(df_result, -c("Treat all", "Treat none")) %>%
-  plot_binned_ridges(., limit_y=F) +
-  labs(x="Net Monetary Benefit (NMB)\n")
+```
+
+```{r, echo=F, fig.align='center', fig.height=4.8, fig.width=10}
+fx_newplot <- function(data) {
+  df_long <- 
+    data %>%
+    pivot_longer(!n_sim) %>%
+    group_by(name) %>%
+    arrange(value) %>%
+    mutate(percentile=row_number()/n()) %>%
+    ungroup() %>%
+    mutate(in_interval = percentile > 0.025 & percentile < 0.975)
+  
+  df_agg <- 
+    df_long %>%
+    group_by(name) %>%
+    summarize(m=median(value))
+  
+  df_long %>%
+    ggplot(aes(value, fill=in_interval)) +
+    geom_histogram(bins=40) + 
+    geom_vline(data=df_agg, aes(xintercept=m), size=2, alpha=0.6) +
+    coord_flip() +
+    facet_grid(~name) +
+    theme_bw() +
+    scale_fill_manual(values=c("#ADD8E6","grey50"), breaks=c(TRUE, FALSE)) +
+    guides(fill="none") +
+    scale_x_continuous(labels=scales::dollar_format()) +
+    labs(
+      x="Net Monetary Benefit (NMB)\n",
+      y="Number of simulations (n)"
+    )
+}
+
+select(df_result, -c("Treat all", "Treat none")) %>% fx_newplot()
+
 ```
 
 ## Results - primary analysis
