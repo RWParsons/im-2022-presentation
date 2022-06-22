@@ -300,9 +300,14 @@ TODO: changes with AUC and event_rate
 
 - Considering costs when selecting a model cutpoint may facilitate value-based care
 
-- The best approach may be to treat-all or treat-none and this should be assessed under hypothetical model performance and simulated patient populations before wasting research efforts in seeking out CDSS
+- The best approach may be to treat-all or treat-none
 
 
+## shiny app
+
+```{r, echo=F, warning=F, message=F}
+shinyAppDir("apps/cost-effective-cpms-app/")
+```
 
 ## Thank you
 
@@ -312,12 +317,12 @@ Team
   - Susanna Cramb
   - Steven McPhail
 
-<br>
-
-![](www/twitter-logo.png){width=30 align="left"} @Rex_Parsons8
+![](www/twitter-logo.png){width=30 align="left"} @Rex_Parsons8  
 
 ![](www/github-logo.png){width=30px align="left"} @RWParsons
 
 ![](www/website-icon.png){width=30px align="left"} http://rwparsons.github.io/
+
+shiny app: [aushsi.shinyapps.io/cost-effective-cpms-app/](https://aushsi.shinyapps.io/cost-effective-cpms-app/)
 
 slides: [github.com/RWParsons/im-22-presentation](https://github.com/RWParsons/im-22-presentation)
