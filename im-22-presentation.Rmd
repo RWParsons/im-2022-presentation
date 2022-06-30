@@ -332,11 +332,17 @@ cowplot::plot_grid(event_rate_title, readRDS("input/event_rate_plot.rds"), rel_h
 ```
 
 
-## Conclusions
+## Conclusions {.build}
 
-- Considering costs when selecting a model cutpoint may facilitate value-based care
+>- Considering costs when selecting a model cutpoint may facilitate value-based care
+
 
 - The best approach may be to treat-all or treat-none
+    - Worth considering before building prediction model 
+        - how good would a model need to be to be of any benefit with my available interventions and with my current patient population?
+    - Requires simulation and estimates for costs and healthcare outcome with and without the intervention (and uncertainty)
+
+![](www/hex.png){.center width=130px}
 
 
 ## shiny app
