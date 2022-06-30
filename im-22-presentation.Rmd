@@ -312,9 +312,24 @@ df_result %>%
 ```
 
 
-## Results - sensitivity analyses
+## {.fullscreen}
 
-TODO: changes with AUC and event_rate
+```{r echo=F, fig.align='center', fig.height=6.5, fig.width=7}
+auc_title <- 
+  cowplot::ggdraw() + 
+  cowplot::draw_label("Benefit is greater for less discriminant models", fontface='bold')
+cowplot::plot_grid(auc_title, readRDS("input/auc_plot.rds"), rel_heights=c(0.05,1), ncol=1)
+```
+
+
+## {.fullscreen}
+
+```{r echo=F, fig.align='center', fig.height=6.5, fig.width=7}
+event_rate_title <- 
+  cowplot::ggdraw() + 
+  cowplot::draw_label("Benefit is greater for rarer events", fontface='bold')
+cowplot::plot_grid(event_rate_title, readRDS("input/event_rate_plot.rds"), rel_heights=c(0.05,1), ncol=1)
+```
 
 
 ## Conclusions
