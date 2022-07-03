@@ -187,13 +187,13 @@ $$
 
 ## Cost-effective cutpoint {.build}
 
-The `{cutpointr}` R package by Christian Thiele includes almost all the cutpoint selection methods methods but also allows you to pass custom metrics that aren't already built in
+The `{cutpointr}` R package by Christian Thiele includes almost all the cutpoint selection methods and also allows you to pass custom metrics that aren't already built in
 
 Applied a custom metric and `{cutpointr}` to maximise NMB: 
 
 - Requires predictions, outcomes, and NMB values assigned to each class (TP, TN, FP, FN)
 
-$n_{TP} \times NMB_{TP} + n_{FP} \times NMB_{FP} + n_{TN} \times NMB_{TN} + n_{FN} \times NMB_{FN}$
+$CE(c) = n_{TP} \times NMB_{TP} + n_{FP} \times NMB_{FP} + n_{TN} \times NMB_{TN} + n_{FN} \times NMB_{FN}$
 
 <br>
 
@@ -210,7 +210,7 @@ Special thank you to Christian for responding to my twitter DMs and making an up
 >- Used point estimates of these for obtaining the cost-effective-threshold but incorporated uncertainty for evaluation
 
 
-## Simulation loop{.build}
+## Simulation loop {.build}
 
 >1. Sample training data
 >2. Fit prediction model
