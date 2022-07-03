@@ -177,6 +177,14 @@ data.frame(
   column_spec(1, bold=T)
 ```
 
+<div class="notes">
+$$ \tiny
+NMB = COST_{outcome}\times(1-EFFECT_{treatment}) + COST_{treatment}
+\\
+\scriptsize COST_{outcome} = QALY\times WTP
+$$
+</div>
+
 ## Cost-effective cutpoint {.build}
 
 The `{cutpointr}` R package by Christian Thiele includes almost all the cutpoint selection methods methods but also allows you to pass custom metrics that aren't already built in
