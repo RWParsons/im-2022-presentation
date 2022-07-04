@@ -295,28 +295,45 @@ select(df_result, -c("Treat all", "Treat none")) %>% fx_newplot()
 
 p1 <- df_result %>% 
   mutate(across(!n_sim, function(x) x - `Treat none`)) %>%
-  select(-c(2:3)) %>%
+  select(-`Treat none`) %>%
   fx_newplot() +
-  xlab("Incremental Net Monetary Benefit (INB)")
+  xlab("INB (Treat None as ref.)")
 
 p2 <- df_result %>% 
+  mutate(across(!n_sim, function(x) x - `Treat all`)) %>%
+  # select(-c(2:3)) %>%
+  select(-`Treat all`) %>%
+  fx_newplot() +
+  xlab("INB (Treat All as ref.)")
+
+p3 <- df_result %>% 
   # mutate(across(!n_sim, function(x) x - `Treat all`)) %>%
-  select(-c(2:3)) %>%
+  # select(-c(2:3)) %>%
   fx_newplot()
 
-df_result %>%
+cowplot::plot_grid(p1, p2, p3, ncol=1)
+
+df_percent_best <- 
+  df_result %>%
   pivot_longer(!n_sim) %>%
   group_by(n_sim) %>%
   arrange(desc(value)) %>% 
   slice(1) %>%
   ungroup() %>%
   group_by(name) %>%
-  summarize(
-    n=n(), 
-    `%`=scales::percent(n/nrow(.))
-  )
+  summarize(n=n())
 
-cowplot::plot_grid(p1, p2, ncol=1)
+data.frame(name=names(df_result)[-1]) %>%
+  left_join(., df_percent_best, by="name") %>%
+  mutate(
+    n=ifelse(is.na(n), 0, n),
+    `%`=scales::percent(n/nrow(df_result))
+  ) %>%
+  arrange(desc(n)) %>%
+  rename("Method"=name) %>%
+  kable() %>%
+  kable_styling(font_size=15, full_width=FALSE) %>%
+  column_spec(1, bold=T)
 
 ```
 
