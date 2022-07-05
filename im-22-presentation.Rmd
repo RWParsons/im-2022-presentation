@@ -41,10 +41,6 @@ $(document).ready(function() {
 - Integrating economic considerations into cutpoint selection
 - Simulation study results
 
-## {.fullside}
-
-![](www/intro-boring.png){.center height=600px}
-
 
 ## Computerised decision support systems {.fullside}
 
@@ -191,13 +187,132 @@ The `{cutpointr}` R package by Christian Thiele includes almost all the cutpoint
 
 Applied a custom metric and `{cutpointr}` to maximise NMB: 
 
-- Requires predictions, outcomes, and NMB values assigned to each class (TP, TN, FP, FN)
+$$
+\small
+CE(c) = n_{TP} \times NMB_{TP} + n_{FP} \times NMB_{FP} + n_{TN} \times NMB_{TN} + n_{FN} \times NMB_{FN}
+$$
 
-$CE(c) = n_{TP} \times NMB_{TP} + n_{FP} \times NMB_{FP} + n_{TN} \times NMB_{TN} + n_{FN} \times NMB_{FN}$
+## Cost-effective cutpoint {.build}
 
-<br>
+$$
+\small
+CE(c) = n_{TP} \times NMB_{TP} + n_{FP} \times NMB_{FP} + n_{TN} \times NMB_{TN} + n_{FN} \times NMB_{FN}
+$$
 
-Special thank you to Christian for responding to my twitter DMs and making an update to `{cutpointr}` that made this study easier!
+```{r, echo=F}
+data.frame(
+  row.names = c("Actually Positive", "Actually Negative"),
+  P_Positive = c(
+    "$NMB_{TP} = COST_{outcome}\\times(1-EFFECT_{treatment}) + COST_{treatment}$", 
+    "$NMB_{FP} = COST_{treatment}$"
+  ), 
+  P_Negative = c(
+    "$NMB_{FN} = COST_{outcome}$",
+    "$NMB_{TN} = 0$"
+  )
+) %>%
+  rename("Predicted Positive" = P_Positive,
+         "Predicted Negative" = P_Negative) %>%
+  kable('html') %>%
+  kable_styling(font_size=15, full_width=FALSE, latex_options = c('hold_position')) %>%
+  column_spec(1, bold=T)
+
+```
+
+```{r, echo=F}
+data.frame(
+  row.names = c("Actually Positive", "Actually Negative"),
+  P_Positive = c("TRUE POSITIVE ($n_{TP}$)", "FALSE POSITIVE ($n_{FP}$)"), 
+  P_Negative = c("FALSE NEGATIVE ($n_{FN}$)", "TRUE NEGATIVE ($n_{TN}$)")
+) %>%
+  rename("Predicted Positive" = P_Positive,
+         "Predicted Negative" = P_Negative) %>%
+  kable() %>%
+  kable_styling(font_size=15, full_width=FALSE) %>%
+  column_spec(1, bold=T)
+```
+
+## Cost-effective cutpoint
+
+$$
+\small
+CE(c) = \color{red}{n_{TP}} \times \color{red}{NMB_{TP}} + n_{FP} \times NMB_{FP} + n_{TN} \times NMB_{TN} + n_{FN} \times NMB_{FN}
+$$
+
+```{r, echo=F}
+data.frame(
+  row.names = c("Actually Positive", "Actually Negative"),
+  P_Positive = c(
+    "$\\color{red}{NMB_{TP}} = COST_{outcome}\\times(1-EFFECT_{treatment}) + COST_{treatment}$", 
+    "$NMB_{FP} = COST_{treatment}$"
+  ), 
+  P_Negative = c(
+    "$NMB_{FN} = COST_{outcome}$",
+    "$NMB_{TN} = 0$"
+  )
+) %>%
+  rename("Predicted Positive" = P_Positive,
+         "Predicted Negative" = P_Negative) %>%
+  kable('html') %>%
+  kable_styling(font_size=15, full_width=FALSE, latex_options = c('hold_position')) %>%
+  column_spec(1, bold=T)
+
+```
+
+```{r, echo=F}
+data.frame(
+  row.names = c("Actually Positive", "Actually Negative"),
+  P_Positive = c("TRUE POSITIVE ($\\color{red}{n_{TP}}$)", "FALSE POSITIVE ($n_{FP}$)"), 
+  P_Negative = c("FALSE NEGATIVE ($n_{FN}$)", "TRUE NEGATIVE ($n_{TN}$)")
+) %>%
+  rename("Predicted Positive" = P_Positive,
+         "Predicted Negative" = P_Negative) %>%
+  kable() %>%
+  kable_styling(font_size=15, full_width=FALSE) %>%
+  column_spec(1, bold=T)
+```
+
+## Cost-effective cutpoint
+
+$$
+\small
+CE(c) = n_{TP} \times NMB_{TP} + \color{blue}{n_{FP}} \times \color{blue}{NMB_{FP}} + n_{TN} \times NMB_{TN} + n_{FN} \times NMB_{FN}
+$$
+
+```{r, echo=F}
+data.frame(
+  row.names = c("Actually Positive", "Actually Negative"),
+  P_Positive = c(
+    "$NMB_{TP} = COST_{outcome}\\times(1-EFFECT_{treatment}) + COST_{treatment}$", 
+    "$\\color{blue}{NMB_{FP}} = COST_{treatment}$"
+  ), 
+  P_Negative = c(
+    "$NMB_{FN} = COST_{outcome}$",
+    "$NMB_{TN} = 0$"
+  )
+) %>%
+  rename("Predicted Positive" = P_Positive,
+         "Predicted Negative" = P_Negative) %>%
+  kable('html') %>%
+  kable_styling(font_size=15, full_width=FALSE, latex_options = c('hold_position')) %>%
+  column_spec(1, bold=T)
+
+```
+
+```{r, echo=F}
+data.frame(
+  row.names = c("Actually Positive", "Actually Negative"),
+  P_Positive = c("TRUE POSITIVE ($n_{TP}$)", "FALSE POSITIVE ($\\color{blue}{n_{FP}}$)"), 
+  P_Negative = c("FALSE NEGATIVE ($n_{FN}$)", "TRUE NEGATIVE ($n_{TN}$)")
+) %>%
+  rename("Predicted Positive" = P_Positive,
+         "Predicted Negative" = P_Negative) %>%
+  kable() %>%
+  kable_styling(font_size=15, full_width=FALSE) %>%
+  column_spec(1, bold=T)
+```
+
+
 
 ## Simulation study - inpatient falls
 
