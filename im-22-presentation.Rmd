@@ -1,13 +1,17 @@
 ---
 title: "Cost effectiveness-informed cutpoints for clinical prediction models"
 author: "Rex Parsons"
-date: "2022-07-15"
+date: '2022-07-15'
 output:
   ioslides_presentation:
-    widescreen: true
-    logo: 'www/aushsi-logo.png'
+    widescreen: yes
+    logo: www/aushsi-logo.png
     css: www/styles.css
 runtime: shiny
+resource_files:
+- apps/cost-effective-cpms-app/app.R
+- apps/cost-effective-cpms-app/utils.R
+- apps/prediction-threshold-slider/app.R
 ---
 
 ```{r setup, include=FALSE}
