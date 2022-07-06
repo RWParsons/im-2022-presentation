@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(kableExtra)
 source("apps/src/utils.R")
+source("src/functions.R")
 ```
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -341,95 +342,36 @@ data.frame(
 ## Results - primary analysis
 
 ```{r, echo=F, warning=F, message=F, fig.align="center", fig.height=5}
-df_result <- readRDS("input/falls_sim_data.rds")
-library(bayestestR)
-library(ggridges)
+falls_sim <- readRDS("input/falls_sim_data.rds")
 
-names(df_result) <- c(
-  "n_sim", "Treat all", "Treat none", "Cost-effective", 
-  "The Closest to (0, 1) Criteria", "Youden", "Sens-Spec product", 
-  "Index of Union"
+cols_rename <- c(
+  "Treat All"="treat_all",
+  "Treat None"="treat_none",
+  "Cost-effective" ="cost_effective",
+  "The Closest to (0, 1) Criteria"="er", 
+  "Youden"="youden", 
+  "Sens-Spec product"="cz", 
+  "Index of Union"="iu"
 )
+
+falls_sim$df_result <- 
+  falls_sim$df_result %>%
+  rename(any_of(cols_rename))
+
+falls_sim$df_result %>%
+  plot_fw_histogram(
+    hdi=F, 
+    plot_labels=labs(x="Incremental Net Monetary Benefit (AUD)\n(reference method: Treat All)\n", y=""), 
+    inb_ref_col='Treat All'
+  )
 
 ```
 
+## Results - primary analysis
+
 ```{r, echo=F, fig.align='center', fig.height=4.8, fig.width=10}
-fx_newplot <- function(data) {
-  df_long <- 
-    data %>%
-    pivot_longer(!n_sim) %>%
-    group_by(name) %>%
-    arrange(value) %>%
-    mutate(percentile=row_number()/n()) %>%
-    ungroup() %>%
-    mutate(in_interval = percentile > 0.025 & percentile < 0.975)
-  
-  df_agg <- 
-    df_long %>%
-    group_by(name) %>%
-    summarize(m=median(value))
-  
-  p <-
-    df_long %>%
-    ggplot(aes(value, fill=in_interval)) +
-    geom_histogram(bins=40) + 
-    coord_flip() +
-    facet_grid(~name) +
-    theme_bw() +
-    scale_fill_manual(values=c("grey50","grey50", "#ADD8E6")) +
-    guides(fill="none") +
-    scale_x_continuous(labels=scales::dollar_format()) +
-    scale_y_continuous(n.breaks=3) + 
-    labs(
-      x="Net Monetary Benefit (NMB)\n",
-      y="Number of simulations (n)"
-    )
-  
-  my_plot_innards <- ggplot_build(p)
-  
-  extracted_points <- tibble(
-    nmb = my_plot_innards[["data"]][[1]][["x"]],
-    count = my_plot_innards[["data"]][[1]][["y"]],
-    in_interval = (my_plot_innards[["data"]][[1]][["group"]]) %>% as.factor(),
-    method = (my_plot_innards[["data"]][[1]][["PANEL"]] %>% as.character)
-  )
-  
-  heights <- 
-    df_agg %>%
-    rownames_to_column(var="method_n") %>%
-    left_join(extracted_points, by=c("method_n"="method")) %>%
-    mutate(diff=abs(m-nmb)) %>%
-    group_by(name) %>%
-    arrange(diff) %>%
-    slice(1)
-  
-  p + geom_segment(data=heights, aes(x=m, xend=m, y=0, yend=count), size=2, alpha=0.6)
-}
-
-select(df_result, -c("Treat all", "Treat none")) %>% fx_newplot()
-
-p1 <- df_result %>% 
-  mutate(across(!n_sim, function(x) x - `Treat none`)) %>%
-  select(-`Treat none`) %>%
-  fx_newplot() +
-  xlab("INB (Treat None as ref.)")
-
-p2 <- df_result %>% 
-  mutate(across(!n_sim, function(x) x - `Treat all`)) %>%
-  # select(-c(2:3)) %>%
-  select(-`Treat all`) %>%
-  fx_newplot() +
-  xlab("INB (Treat All as ref.)")
-
-p3 <- df_result %>% 
-  # mutate(across(!n_sim, function(x) x - `Treat all`)) %>%
-  # select(-c(2:3)) %>%
-  fx_newplot()
-
-cowplot::plot_grid(p1, p2, p3, ncol=1)
-
 df_percent_best <- 
-  df_result %>%
+  falls_sim$df_result %>%
   pivot_longer(!n_sim) %>%
   group_by(n_sim) %>%
   arrange(desc(value)) %>% 
@@ -438,33 +380,33 @@ df_percent_best <-
   group_by(name) %>%
   summarize(n=n())
 
-data.frame(name=names(df_result)[-1]) %>%
+# make table with % winner
+data.frame(name=names(falls_sim$df_result)[-1]) %>%
   left_join(., df_percent_best, by="name") %>%
   mutate(
     n=ifelse(is.na(n), 0, n),
-    `%`=scales::percent(n/nrow(df_result))
+    `%`=scales::percent(n/nrow(falls_sim$df_result))
   ) %>%
   arrange(desc(n)) %>%
   rename("Method"=name) %>%
-  kable() %>%
-  kable_styling(font_size=15, full_width=FALSE) %>%
+  kable(caption="Number of simulations with best NMB") %>%
+  kable_styling(font_size=15, full_width=FALSE, position="float_left") %>%
   column_spec(1, bold=T)
 
-```
-
-## Results - primary analysis
-
-```{r, echo=F}
-df_result %>%
+# table of median NMB
+falls_sim$df_result %>%
   pivot_longer(!n_sim) %>%
   group_by("Cutpoint method"=name) %>%
-  summarize(median_nmb = median(value)) %>%
-  arrange(desc(median_nmb)) %>%
-  mutate("Median NMB" = scales::dollar_format()(median_nmb)) %>%
-  select(-median_nmb) %>%
-  kable() %>%
-  kable_styling(font_size=15, full_width=FALSE) %>%
+  summarize(median_nmb = median(value),
+            mean_nmb = mean(value)) %>%
+  arrange(desc(mean_nmb)) %>%
+  mutate("Median NMB" = scales::dollar_format()(median_nmb),
+         "Mean NMB" = scales::dollar_format()(mean_nmb)) %>%
+  select(-median_nmb, -mean_nmb) %>%
+  kable(caption="NMB under each cutpoint method") %>%
+  kable_styling(font_size=15, full_width=FALSE, position="float_right") %>%
   column_spec(1, bold=T)
+
 ```
 
 
