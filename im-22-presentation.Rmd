@@ -470,3 +470,8 @@ Team
 shiny app: [aushsi.shinyapps.io/cost-effective-cpms-app/](https://aushsi.shinyapps.io/cost-effective-cpms-app/)
 
 slides: [github.com/RWParsons/im-22-presentation](https://github.com/RWParsons/im-22-presentation)
+
+
+## {.fullside}
+
+$t=\frac{C_{FP}-C_{TN}}{C_{FP}+C_{FN}-C_{TP}-C_{TN}}$ <img src='www/calibration_plots.jpeg' align="right" height="600" />
