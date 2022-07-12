@@ -47,11 +47,9 @@ $(document).ready(function() {
 - Simulation study results
 
 
-## Computerised decision support systems {.fullside}
-
-![](www/cdss.jpg){.center height=450px}
-
 ## Prediction models
+
+![](www/cdss.jpg){.center height=300px}
 
 >- Do they have it? (diagnostic)
 >- Will they get it? (prognostic)
