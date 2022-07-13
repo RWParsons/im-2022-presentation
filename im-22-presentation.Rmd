@@ -119,13 +119,13 @@ shinyAppDir("apps/prediction-threshold-slider/")
 
 All maximise a performance based metric (not outcome) <footnote>Ilker Unal. "Defining an Optimal Cut-Point Value in ROC Analysis: An Alternative Approach." *Computational and Mathematical Methods in Medicine* (2017).</footnote>
 
-- Youden index: $J(c) = Se(c) + Sp(c) - 1$
+- Youden index
 
-- Sens-Spec product: $CZ(c) = Se(c) \times Sp(c)$
+- Sens-Spec product
 
-- Index of Union: $IU(c) = |Se(c) − AUC| + |Sp(c) − AUC|$
+- Index of Union
 
-- The Closest to (0, 1) Criteria: $ER(c) = \sqrt{(1 − Se(c)^2) + (1 − Sp(c)^2)}$
+- The Closest to (0, 1) Criteria
 
 <br>
 
